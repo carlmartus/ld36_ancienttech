@@ -1,2 +1,2 @@
-# ld36_ancienttech
-Ludum Dare 36 - Ancient technology
+# Ludum Dare 36 - *Ancient technology*
+
