@@ -8,23 +8,127 @@ body {
 	background-color: #112;
 }
 
-#gameArea {
-	/* border: 1px solid #800;
+.topBox {
+	height: 70px;
+}
+
+.gameWindow {
+	font-family: Arial;
+	font-size: 12px;
+	background: gray;
 	width: 620px;
 	height: 620px;
-	border-radius: 8px;
-	box-shadow: 0px 2px 5px #800;*/
+	padding: 8px;
+}
+
+.selectedPane {
+	height: 80px;
+}
+
+.triggerPane {
+}
+
+.decisionPane {
+	overflow-y: scroll;
+	height: 440px;
+}
+
+button, select {
+	width: 100%;
+	background: black;
+	color: white;
+	border: 2px solid silver;
+}
+
+select {
+	font-size: 10px;
+}
+
+p {
+	font-size: 8px;
+}
+
+.btnApply {
+	font-size: 12px;
+	padding: 8px;
+	border-color: lime;
+}
+
+.pane {
+	background: #995;
+	padding: 2px;
+	margin-bottom: 8px;
+}
+
+.block {
+	width: 32px;
+	height: 32px;
 }
 </style>
 </head>
 
 <body onload="main()">
 <center>
-<div id="gameArea">&nbsp;</div>
+
+<div class="gameWindow" align="left">
+<table>
+
+<tr><td colspan="2"><div class="topBox">&nbsp;</div></td></tr>
+
+<tr><td>
+<div id="gameArea" align="left">&nbsp;</div>
+</td>
+
+<td width="200" valign="top">
+
+<div class="selectedPane pane">
+<div data-bind="visible: !selected()">
+<h3>Nothing selected</h3>
+</div>
+
+<div data-bind="visible: selected">
+<h3>Selected <span data-bind="text: selectedName"></span></h3>
+<p><button class="btnApply" data-bind="click: apply">Apply settings</button></p>
+</div>
+
+</div>
+
+<div data-bind="visible: selected" class="pane decisionPane">
+<div data-bind="template: { name: 'trigger', foreach: decision }"></div>
+</div>
+</td>
+
+</tr>
+</table>
+</div>
+
 </center>
 </body>
 
 <script src="pixi.min.js"></script>
+<script src="knockout-3.4.0.js"></script>
 <script src="game.js"></script>
+
+<script type="text/html" id="trigger">
+<div class="triggerPane">
+<h3>Decision <span data-bind="text: desc"></span></h3>
+
+<p>When: <select data-bind="value: triggerType">
+<option value="0">Unused slot</option>
+<option value="1">Idle</option>
+<option value="2">Enemy detected</option>
+<option value="3">Enemy in weapon range</option>
+</select></p>
+
+<div data-bind="visible: triggerType() == 1">
+<p>Idle action: <select data-bind="value: actionIdle">
+<option value="0">Halt</option>
+<option value="1">Orbit planet</option>
+</select></p>
+</div>
+
+</div>
+</script>
+
 </html>
 
