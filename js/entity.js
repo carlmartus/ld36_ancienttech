@@ -37,7 +37,7 @@ function Entity(texture, name, controlable, isEnemy, start, topSpeed, scale, fir
 		let self = this;
 
 		spriteButton(this.hitBox, function() {
-			knockout.setSelected(self.name, false, "N/A", self.topSpeed);
+			knockout.setSelected(self.name, false, "No stellar weapons", self.topSpeed);
 			setZoomTarget(self);
 		});
 	}
@@ -50,7 +50,10 @@ Entity.prototype.animate = function(time) {
 
 	if (this.isEnemy) {
 		if (this.setMovement(stellarCenter) < 200) {
-			return kysEntity(this);
+			knockout.countLoots(knockout.countLoots() + 1);
+			kysEntity(this);
+			considerGameOver();
+			return;
 		}
 	}
 
@@ -63,8 +66,8 @@ Entity.prototype.animate = function(time) {
 	}
 
 	if (this.activeSpeed > 0.0) {
-		this.position.x += this.activeSpeed * Math.cos(this.sprite.rotation);
-		this.position.y += this.activeSpeed * Math.sin(this.sprite.rotation);
+		this.position.x += this.activeSpeed * Math.cos(this.sprite.rotation) * time;
+		this.position.y += this.activeSpeed * Math.sin(this.sprite.rotation) * time;
 	}
 
 	this.sprite.position.copy(this.position);
@@ -102,7 +105,8 @@ Entity.prototype.fireAt = function(target) {
 
 	target.health -= 1;
 	this.weaponCooldown = 1.0;
-	spawnLaser(this.position, target.position);
+	spawnLaser(this.position, target.position,
+			this.fireRange > 1200 ? 0x88ff88 : 0xff0000);
 
 	damageControl(target);
 	this.decide();
@@ -147,9 +151,9 @@ Entity.prototype.progressIdlePlanet = function(time) {
 			stellarCenter.y - this.position.y,
 			stellarCenter.x - this.position.x);
 
-	if (dist < 400) {
+	if (dist < 300) {
 		v += Math.PI;
-	} else if (dist < 700) {
+	} else if (dist < 400) {
 		v += Math.PI*0.5;
 	}
 
@@ -159,7 +163,11 @@ Entity.prototype.progressIdlePlanet = function(time) {
 
 Entity.prototype.progressManeuver = function(time, circleDistance) {
 	let dist = this.setMovement(this.activeDecision.target.position);
-	if (dist < circleDistance) {
+	if (dist < circleDistance + 100) { // Smooth rotation
+		let p = (dist - circleDistance) * 0.01;
+		this.setMovement(this.activeDecision.target.position, p*Math.PI*0.5);
+
+	} else if (dist < circleDistance) {
 		this.setMovement(this.activeDecision.target.position, Math.PI*0.5);
 	}
 };
@@ -207,61 +215,53 @@ Entity.prototype.matchDecision = function() {
 Entity.prototype.collectGroundWork = function() {
 	let gws = [];
 
+	let nearestDistDirectInRange, nearestEntityDirecInRange;
+	let nearestDistDirectTotal, nearestEntityDirectTotal;
+	let nearestDistPlanetInRange, nearestEntityPlanetInRange;
+	let nearestDistPlanetTotal, nearestEntityPlanetTotal;
+
+	// Enemies?
+	for (let e of entities) {
+		if (!e.isEnemy) continue;
+
+		let dx, dy, distEntity, distPlanet, v;
+		dx = e.position.x - this.position.x;
+		dy = e.position.y - this.position.y;
+		distEntity = Math.sqrt(dx*dx + dy*dy);
+
+		dx = e.position.x - stellarCenter.x;
+		dy = e.position.y - stellarCenter.y;
+		distPlanet = Math.sqrt(dx*dx + dy*dy);
+
+		if (!nearestEntityDirectTotal ||
+				distEntity < nearestDistDirectTotal) {
+			nearestEntityDirectTotal = e;
+			nearestDistDirectTotal = distEntity;
+		}
+
+		if (!nearestEntityPlanetTotal ||
+				distPlanet < nearestDistPlanetTotal) {
+			nearestEntityPlanetTotal = e;
+			nearestDistPlanetTotal = distPlanet;
+		}
+
+		if (distEntity < this.fireRange) {
+
+			if (!nearestEntityDirecInRange ||
+					distEntity < nearestDistDirectInRange) {
+				nearestEntityDirecInRange = e;
+				nearestDistDirectInRange = distEntity;
+			}
+
+			if (!nearestEntityPlanetInRange ||
+					distPlanet < nearestDistPlanetInRange) {
+				nearestEntityPlanetInRange = e;
+				nearestDistPlanetInRange = distPlanet;
+			}
+		}
+	}
+
 	if (this.weaponCooldown <= 0.0) {
-		let nearestDistDirectInRange, nearestEntityDirecInRange;
-		let nearestDistDirectTotal, nearestEntityDirectTotal;
-		let nearestDistPlanetInRange, nearestEntityPlanetInRange;
-		let nearestDistPlanetTotal, nearestEntityPlanetTotal;
-
-		// Enemies?
-		for (let e of entities) {
-			if (!e.isEnemy) continue;
-
-			let dx, dy, distEntity, distPlanet, v;
-			dx = e.position.x - this.position.x;
-			dy = e.position.y - this.position.y;
-			distEntity = Math.sqrt(dx*dx + dy*dy);
-
-			dx = e.position.x - stellarCenter.x;
-			dy = e.position.y - stellarCenter.y;
-			distPlanet = Math.sqrt(dx*dx + dy*dy);
-
-			if (!nearestEntityDirectTotal ||
-					distEntity < nearestDistDirectTotal) {
-				nearestEntityDirectTotal = e;
-				nearestDistDirectTotal = distEntity;
-			}
-
-			if (!nearestEntityPlanetTotal ||
-					distPlanet < nearestDistPlanetTotal) {
-				nearestEntityPlanetTotal = e;
-				nearestDistPlanetTotal = distPlanet;
-			}
-
-			if (distEntity < this.fireRange) {
-
-				if (!nearestEntityDirecInRange ||
-						distEntity < nearestDistDirectInRange) {
-					nearestEntityDirecInRange = e;
-					nearestDistDirectInRange = distEntity;
-				}
-
-				if (!nearestEntityPlanetInRange ||
-						distPlanet < nearestDistPlanetInRange) {
-					nearestEntityPlanetInRange = e;
-					nearestDistPlanetInRange = distPlanet;
-				}
-			}
-		}
-
-		if (nearestEntityDirectTotal) {
-			gws.push(makeTrigger(TRIGGER_ENEMY_DETECTED, nearestEntityDirectTotal, FOCUS_NEAREST));
-		}
-
-		if (nearestEntityPlanetTotal) {
-			gws.push(makeTrigger(TRIGGER_ENEMY_DETECTED, nearestEntityPlanetTotal, FOCUS_PLANET));
-		}
-
 		if (nearestEntityDirecInRange) {
 			gws.push(makeTrigger(TRIGGER_ENEMY_INRANGE, nearestEntityDirecInRange, FOCUS_NEAREST));
 		}
@@ -269,6 +269,14 @@ Entity.prototype.collectGroundWork = function() {
 		if (nearestEntityPlanetInRange) {
 			gws.push(makeTrigger(TRIGGER_ENEMY_INRANGE, nearestEntityPlanetInRange, FOCUS_PLANET));
 		}
+	}
+
+	if (nearestEntityDirectTotal) {
+		gws.push(makeTrigger(TRIGGER_ENEMY_DETECTED, nearestEntityDirectTotal, FOCUS_NEAREST));
+	}
+
+	if (nearestEntityPlanetTotal) {
+		gws.push(makeTrigger(TRIGGER_ENEMY_DETECTED, nearestEntityPlanetTotal, FOCUS_PLANET));
 	}
 
 	// Idle

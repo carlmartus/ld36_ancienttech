@@ -40,7 +40,7 @@ function newWave() {
 		createSpeceEntity(texEnemy0, "Hittite looter", false,
 				ENEMY_FILTER_SMALL,
 				x, y,
-				1, 1);
+				80, 1);
 	}
 };
 

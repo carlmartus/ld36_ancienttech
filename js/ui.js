@@ -13,6 +13,9 @@ function makeKoDecision(num, firstHalt) {
 function KnockoutModel() {
 	let self = this;
 
+	self.countLoots = ko.observable(0);
+	self.countFrags = ko.observable(0);
+
 	self.selected = ko.observable(false);
 	self.selectedName = ko.observable("N/A");
 	self.selectedRange = ko.observable(0);
@@ -40,18 +43,18 @@ function KnockoutModel() {
 		resetZoom();
 	};
 
-	self.settleText = ko.observable('Settle planet');
+	self.settleText = ko.observable('Start invasion');
 	self.unSettled = ko.observable(true);
 	self.settlePlanet = function() {
 		swarmEnabled = true;
 		self.unSettled(false);
-		self.settleText('Settlement active');
+		self.settleText('Game started');
 	};
 
 	self.restartGame = function() {
 		restartGame();
 		self.unSettled(true);
-		self.settleText = ko.observable('Try again');
+		self.settleText = ko.observable('Play again');
 	};
 };
 

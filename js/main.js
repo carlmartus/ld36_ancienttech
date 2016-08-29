@@ -1,4 +1,4 @@
-var lastTime;
+var lastTime, timeProgress, testGameOver;
 
 var zoom, viewX, viewY, tracking;
 var zooming, zAX, zAY, zBX, zBY, zA, zB, zT;
@@ -29,12 +29,17 @@ var hudContainer;
 var btnZoomOut;
 var panelTriggers, panelCommands;
 
+var messageWin = "Triumph! A world has been enlightened! We welcome our new brothers into a interstellar era of prosperity!";
+var messageLoose = "Blasted looters! They plundered our world clean of new technology. With this our will to learn more has been silenced by fear of them returning. A renaissance stolen...";
+
 
 function setupView() {
 	tracking = null;
+	timeProgress = 1.0;
 	zoom = 1.0;
 	viewX = 0.5;
 	viewY = 0.5;
+	testGameOver = false;
 };
 
 function setZoom(x, y, level, cb) {
@@ -53,7 +58,7 @@ function setZoomTarget(entity) {
 	tracking = entity;
 	if (entity.controlable) {
 		putDecisions(tracking.decisions);
-		knockout.zoomOutText('Give orders');
+		knockout.zoomOutText('OK');
 	} else {
 		knockout.zoomOutText('Zoom out');
 	}
@@ -61,7 +66,7 @@ function setZoomTarget(entity) {
 	setZoom(
 			entity.position.x,
 			entity.position.y,
-			1.5);
+			1.02);
 	knockout.zoomed(true);
 };
 
@@ -115,10 +120,16 @@ function updateViews(time) {
 };
 
 function restartGame() {
+	clearScores();
 	setupSwarm();
 	clearAllState();
 	startLevel();
 	startGame();
+};
+
+function clearScores() {
+	knockout.countFrags(0);
+	knockout.countLoots(0);
 };
 
 function startGame() {
@@ -129,8 +140,25 @@ function startGame() {
 };
 
 function animate() {
+	requestAnimationFrame(animate);
+
+	if (testGameOver) {
+		if (knockout.countFrags() >= 100) {
+			alert(messageWin);
+			return knockout.restartGame();
+		} else if (knockout.countLoots() >= 2) {
+			alert(messageLoose);
+			return knockout.restartGame();
+		}
+
+		testGameOver = false;
+	}
+
 	let now = Date.now();
-	let time = (now - lastTime) * 0.001;
+	let time = (now - lastTime) * 0.001 * timeProgress;
+	lastTime = now;
+
+	if (time > 0.4) time = 0.4;
 	gameTime += time;
 
 	animateSwarm(time);
@@ -139,9 +167,7 @@ function animate() {
 
 	frame.render(root);
 
-	requestAnimationFrame(animate);
 	root.visible = true;
-	lastTime = now;
 };
 
 function start(pal) {
@@ -225,6 +251,10 @@ function setupTextures() {
 	texEnemyBox = palTexture(2, 4, 1, 1);
 	texEnemy0 = palTexture(1, 5, 1, 1);
 	texLaser = palTexture(2, 5, 1, 1);
+};
+
+function considerGameOver() {
+	testGameOver = true;
 };
 
 function setupBackground() {

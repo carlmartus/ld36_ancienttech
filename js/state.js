@@ -44,12 +44,24 @@ function startLevel() {
 	planet = createSpeceEntity(texPlanet, "Planet", false, false,
 			stellarCenter.x, stellarCenter.y, 0.0, 10, 0);
 
-	// Create player controled  ships
-	createSpeceEntity(texShip0, "Anubis", true, ENEMY_FILTER_NONE, 700, 500, 2.0, 1, 800);
-	//createSpeceEntity(texShip0, "Horus", true, ENEMY_FILTER_NONE, 1200, 1000, 1.5, 1, 1000);
-	//createSpeceEntity(texScanner, "Ra", true, ENEMY_FILTER_NONE, 500, 2200, 0.2, 1, 1500);
+	let speedUp = function() {
+		timeProgress = 8.0;
+	};
 
-	//createSpeceEntity(texEnemy0, "Hittite looter", false, ENEMY_FILTER_SMALL, 0, 0, 1, 1);
+	let speedDown = function() {
+		timeProgress = 1.0;
+	};
+
+	planet.sprite.interactive = true;
+	planet.sprite.buttonMode = true;
+	planet.sprite.on('mousedown', speedUp);
+	planet.sprite.on('mouseup', speedDown);
+	planet.sprite.on('mouseupoutside', speedDown);
+
+	// Create player controled  ships
+	createSpeceEntity(texShip0, "Anubis", true, ENEMY_FILTER_NONE, 700, 500, 120, 1, 700);
+	createSpeceEntity(texShip0, "Horus", true, ENEMY_FILTER_NONE, 1200, 1000, 80, 1, 900);
+	createSpeceEntity(texScanner, "Ra", true, ENEMY_FILTER_NONE, 500, 2800, 20, 1, 1500);
 };
 
 function animateSpace(time) {
@@ -101,8 +113,8 @@ function createSpeceEntity(texture, name, playerControl, isEnemy,
 };
 
 
-function spawnLaser(a, b) {
-	let l = new Laser(a, b);
+function spawnLaser(a, b, tint) {
+	let l = new Laser(a, b, tint);
 	fxs.push(l);
 	spaceContainer.addChild(l.sprite);
 };
@@ -128,6 +140,8 @@ function kysFx(fx) {
 function damageControl(target) {
 	if (target.health <= 0) {
 		kysEntity(target);
+		knockout.countFrags(knockout.countFrags() + 1);
+		considerGameOver();
 	}
 };
 
