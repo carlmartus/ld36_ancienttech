@@ -34,7 +34,6 @@ body {
 }
 
 button, select {
-	width: 100%;
 	background: black;
 	color: white;
 	border: 2px solid silver;
@@ -52,6 +51,7 @@ p {
 	font-size: 12px;
 	padding: 8px;
 	border-color: lime;
+	width: 100%;
 }
 
 .pane {
@@ -86,14 +86,14 @@ p {
 <h3>Nothing selected</h3>
 </div>
 
-<div data-bind="visible: selected">
-<h3>Selected <span data-bind="text: selectedName"></span></h3>
-<p><button class="btnApply" data-bind="click: apply">Apply settings</button></p>
+<div data-bind="visible: zoomed">
+<h3>Selected <i data-bind="text: selectedName"></i></h3>
+<p><button class="btnApply" data-bind="click: apply, text: zoomOutText"></button></p>
 </div>
 
 </div>
 
-<div data-bind="visible: selected" class="pane decisionPane">
+<div data-bind="visible: selected" class="decisionPane">
 <div data-bind="template: { name: 'trigger', foreach: decision }"></div>
 </div>
 </td>
@@ -110,20 +110,35 @@ p {
 <script src="game.js"></script>
 
 <script type="text/html" id="trigger">
-<div class="triggerPane">
-<h3>Decision <span data-bind="text: desc"></span></h3>
+<div class="triggerPane pane">
+<p><b>Decision slot <span data-bind="text: desc"></span></b></p>
 
 <p>When: <select data-bind="value: triggerType">
 <option value="0">Unused slot</option>
 <option value="1">Idle</option>
 <option value="2">Enemy detected</option>
-<option value="3">Enemy in weapon range</option>
+<option value="3">Enemy attackable</option>
 </select></p>
+
+<div data-bind="visible: triggerType() == 2 || triggerType() == 3">
+<p>Enemy class: <select data-bind="value: enemyFilter">
+<option value="0">Any</option>
+<option value="1">Small</option>
+<option value="2">Big</option>
+</select></p>
+</div>
 
 <div data-bind="visible: triggerType() == 1">
 <p>Idle action: <select data-bind="value: actionIdle">
 <option value="0">Halt</option>
 <option value="1">Orbit planet</option>
+</select></p>
+</div>
+
+<div data-bind="visible: triggerType() == 2">
+<p>Maveuver: <select data-bind="value: enemyManeuver">
+<option value="0">Agressive attack</option>
+<option value="1">Skirmish</option>
 </select></p>
 </div>
 
