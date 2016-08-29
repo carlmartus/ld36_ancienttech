@@ -1,0 +1,22 @@
+{
+  "name": "ld36_ancienttech",
+  "version": "0.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/carlmartus/ld36_ancienttech.git"
+  },
+  "author": "Martin Sandgren",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/carlmartus/ld36_ancienttech/issues"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0"
+  }
+}

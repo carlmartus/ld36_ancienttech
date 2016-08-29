@@ -9,7 +9,7 @@ body {
 }
 
 .topBox {
-	height: 70px;
+	height: 20px;
 }
 
 .gameWindow {
@@ -22,7 +22,7 @@ body {
 }
 
 .selectedPane {
-	height: 80px;
+	height: 190px;
 }
 
 .triggerPane {
@@ -30,7 +30,12 @@ body {
 
 .decisionPane {
 	overflow-y: scroll;
-	height: 440px;
+	height: 280px;
+}
+
+.decisionUsed {
+	border: 2px solid lime;
+	background: red;
 }
 
 button, select {
@@ -47,11 +52,18 @@ p {
 	font-size: 8px;
 }
 
-.btnApply {
+.btnBig {
 	font-size: 12px;
 	padding: 8px;
-	border-color: lime;
 	width: 100%;
+}
+
+.btnWide {
+	width: 100%;
+}
+
+.btnLime {
+	border-color: lime;
 }
 
 .pane {
@@ -82,13 +94,22 @@ p {
 <td width="200" valign="top">
 
 <div class="selectedPane pane">
-<div data-bind="visible: !selected()">
+
+<p>
+<button class="btnBig" data-bind="click: settlePlanet, enable: unSettled, css: { btnLime: unSettled }, text: settleText">Settle planet</button>
+</p>
+
+<p><button class="btnWide" data-bind="click: restartGame">Restart</button></p>
+
+<div data-bind="visible: !selected(), enable: unSettled">
 <h3>Nothing selected</h3>
 </div>
 
 <div data-bind="visible: zoomed">
 <h3>Selected <i data-bind="text: selectedName"></i></h3>
-<p><button class="btnApply" data-bind="click: apply, text: zoomOutText"></button></p>
+<p>Weapon range: <i data-bind="text: selectedRange"></i></p>
+<p>Speed: <i data-bind="text: selectedSpeed"></i></p>
+<p><button class="btnBig btnLime" data-bind="click: apply, text: zoomOutText"></button></p>
 </div>
 
 </div>
@@ -110,7 +131,7 @@ p {
 <script src="game.js"></script>
 
 <script type="text/html" id="trigger">
-<div class="triggerPane pane">
+<div data-bind="css: { decisionUsed: triggerType() != 0 }" class="triggerPane pane">
 <p><b>Decision slot <span data-bind="text: desc"></span></b></p>
 
 <p>When: <select data-bind="value: triggerType">
@@ -121,10 +142,9 @@ p {
 </select></p>
 
 <div data-bind="visible: triggerType() == 2 || triggerType() == 3">
-<p>Enemy class: <select data-bind="value: enemyFilter">
-<option value="0">Any</option>
-<option value="1">Small</option>
-<option value="2">Big</option>
+<p>Focus: <select data-bind="value: enemyFocus">
+<option value="0">Nearest enemy</option>
+<option value="1">Enemy nearest settlement</option>
 </select></p>
 </div>
 
