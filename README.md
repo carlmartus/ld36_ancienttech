@@ -1,5 +1,7 @@
 # Ludum Dare 36 game "Interstellar Protectorate"
 
+[![Build Status](https://travis-ci.org/carlmartus/ld36_ancienttech.svg?branch=master)](https://travis-ci.org/carlmartus/ld36_ancienttech)
+
 Challenge theme "Ancient technology".
 
 ![Presentation](art/shot1.jpg)
